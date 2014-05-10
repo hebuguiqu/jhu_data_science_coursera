@@ -5,3 +5,5 @@
 *.zip
 
 *.Rhistory
+
+*.RData
