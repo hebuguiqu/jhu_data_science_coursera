@@ -9,3 +9,7 @@
 *.RData
 
 /Exploratory Data Analysis/Course Project 1/household_power_consumption.txt
+
+/Reproducible Research/Peer Assessment 2/repdata_data_StormData.csv.bz2
+
+/R Programming/Programming Assignment 1/.Rhistory
