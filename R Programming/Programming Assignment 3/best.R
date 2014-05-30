@@ -8,11 +8,6 @@ helper <- function(data, col_num, state) {
 }
 
 best <- function(state, outcome) {
-  ## Read outcome data
-  ## Check that state and outcome are valid
-  ## Return hospital name in that state with lowest 30-day death
-  ## rate
-  
   # read the data file
   directory <- "outcome-of-care-measures.csv"
   data <- read.csv(directory, colClasses="character")

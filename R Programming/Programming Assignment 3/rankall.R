@@ -21,12 +21,6 @@ rank_helper <- function(state_subset, outcome_arr, num) {
 }
 
 rankall <- function(outcome, num = "best") {
-  ## Read outcome data
-  ## Check that state and outcome are valid
-  ## For each state, find the hospital of the given rank
-  ## Return a data frame with the hospital names and the
-  ## (abbreviated) state name
-  
   # read the data file
   directory <- "outcome-of-care-measures.csv"
   data <- read.csv(directory, colClasses="character")
