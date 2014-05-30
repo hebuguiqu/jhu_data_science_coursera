@@ -1,94 +1,55 @@
-{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf200
-{\fonttbl\f0\fmodern\fcharset0 Courier;}
-{\colortbl;\red255\green255\blue255;}
-\margl1440\margr1440\vieww10800\viewh8400\viewkind0
-\deftab720
-\pard\pardeftab720
+num_helper <- function(data, col_num, state, num) {
+  state_subset <- data[data[, 7]==state, ]
+  # get "attack", "failure" and "pneumonia" vector
+  outcome_arr <- state_subset[, col_num]
+  len <- dim(state_subset[!is.na(outcome_arr), ])[1]
+  if (num == "worst") {
+    rank <- rank_helper(state_subset, outcome_arr, len)
+  } else if (num > len) {
+    rank <- NA
+  } else {
+    rank <- rank_helper(state_subset, outcome_arr, num)
+  }
+  result <- rank
+  return(result)
+}
 
-\f0\fs24 \cf0 rankhospital <- function(state, outcome, num = "best") \{\
-  # state argument indicates the two letter state abbreviation you would like to gather data for\
-  # outcome argument indicates either heart attack, heart failure, or pneumonia \
-  # num argument can indicate either the best state, worst state, or an integer indicating the ranking \
-  \
-  data <- read.csv("outcome-of-care-measures.csv", colClasses = "character")\
-  source("best.R")\
-  \
-  if(!(state %in% data$State)) \{\
-    stop("invalid state entered")\
-  \}\
-  \
-  ## Return hospital name in that state with the given rank 30-day death rate\
-  \
-  if(outcome == "heart attack") \{\
-    if(num == "worst")\{\
-      return(findWorst(11, state, data))\
-    \}\
-    else \{\
-      data[, 11] <- as.numeric(data[, 11])\
-      dataframe<-data.frame(table(data[["State"]]))\
-      datasubset<-subset(data,data[["State"]]==state)\
-      lengthSubset<-length(datasubset[["State"]])\
-      \
-      datasubset<-datasubset[order(datasubset[[11]],datasubset[["Hospital.Name"]]),]\
-      datasubset<-subset(datasubset,subset=(!is.na(datasubset[[11]])))\
-    \}\
-  \}\
-    \
-  else if (outcome == "heart failure") \{\
-    if(num == "worst")\{\
-      return(findWorst(17, state, data))\
-    \}\
-    else \{\
-      data[, 17] <- as.numeric(data[, 17])\
-      dataframe<-data.frame(table(data[["State"]]))\
-      datasubset<-subset(data,data[["State"]]==state)\
-      lengthSubset<-length(datasubset[["State"]])\
-      \
-      datasubset<-datasubset[order(datasubset[[17]],datasubset[["Hospital.Name"]]),]\
-      datasubset<-subset(datasubset,subset=(!is.na(datasubset[[17]])))\
-    \}\
-  \}\
-  \
-  else if(outcome == "pneumonia") \{\
-    if(num == "worst")\{\
-      return(findWorst(23, state, data))\
-    \}\
-    else \{\
-      data[, 23] <- as.numeric(data[, 23])\
-      dataframe<-data.frame(table(data[["State"]]))\
-      datasubset<-subset(data,data[["State"]]==state)\
-      lengthSubset<-length(datasubset[["State"]])\
-      \
-      datasubset<-datasubset[order(datasubset[[23]],datasubset[["Hospital.Name"]]),]\
-      datasubset<-subset(datasubset,subset=(!is.na(datasubset[[23]])))\
-    \}\
-  \}\
-  else \{\
-    stop("invalid outcomem entered")\
-  \}  \
-\
-  # if num is larger than the number of hospitals in state, function returns NA\
-  if(is.numeric(num)&&(num>lengthSubset)) \{\
-    return(NA)\
-  \}\
-  ##if num is "best" - return best\
-  if(!is.numeric(num) && (num=="best")) \{\
-    return(best(state,outcome)) #use best function \
-  \}\
-\
-  if(is.numeric(num)) \{\
-    return(datasubset[num,"Hospital.Name"])\
-  \}\
-  \
-\}\
-\
-# helper function that finds the worst hospiral for the given outcome number\
-findWorst <- function(outcomeNumber, state, data) \{\
-  data[, outcomeNumber] <- as.numeric(data[, outcomeNumber])\
-  data<-subset(data,data$State==state) # only need info for given state\
-  valMax<-max(data[[outcomeNumber]],na.rm=TRUE) #worse = maximum\
-  data<-subset(data,data[[outcomeNumber]]==valMax)\
-  data<-data[order(data[["Hospital.Name"]]),]\
-  return(data[1,"Hospital.Name"]) #return worst hospital name\
-\}\
+rank_helper <- function(state_subset, outcome_arr, num) {
+  result <- state_subset[, 2][order(outcome_arr, state_subset[, 2])[num]]
+  return(result)
+}
+
+rankhospital <- function(state, outcome, num = "best") {
+  ## Read outcome data
+  ## Check that state and outcome are valid
+  ## Return hospital name in that state with the given rank
+  ## 30-day death rate
+  
+  # read the data file
+  directory <- "outcome-of-care-measures.csv"
+  data <- read.csv(directory, colClasses="character")
+  # change data type from character to numeric
+  data[, 11] <- as.numeric(data[, 11]) # heart attack
+  data[, 17] <- as.numeric(data[, 17]) # heart failure
+  data[, 23] <- as.numeric(data[, 23]) # pneumonia
+  valid_outcomes <- c("heart attack", "heart failure", "pneumonia")
+  if (!state %in% data$State) {
+    stop("invalid state")
+  } else if(!outcome %in% valid_outcomes) {
+    stop("invalid outcome")
+  } else {
+    if (num == "best") {
+      rank <- beast(state, outcome)
+    } else {
+      if(outcome == "heart attack") {
+        rank <- num_helper(data, 11, state, num)
+      } else if(outcome == "heart failure") {
+        rank <- num_helper(data, 17, state, num)
+      } else {
+        rank <- num_helper(data, 23, state, num)
+      }
+    }
+    result <- rank
+    return(result)
+  }
 }
