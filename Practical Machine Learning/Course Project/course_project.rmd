@@ -1,0 +1,64 @@
+---
+title: "Predicting Activity Type"
+author: "Matt Moramarco"
+date: "June 22, 2014"
+output: html_document
+---
+
+### Background
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).
+
+### Initiating the Dataset
+
+```{r}
+library(caret)
+trainingData <- read.csv("pml-training.csv")
+testingData <- read.csv("pml-testing.csv")
+```
+
+### Cleaning Data
+
+Many columns have incomplete data, as such we will only keep those columns that do not have any NAs. Additionally, we set the 'classe' variable to a factor 
+```{r}
+trainingData <- trainingData[, which(colSums(is.na(trainingData)) == 0)]
+keepIndex <- grep("_arm|_forearm|_belt|_dumbbell|user|classe",names(trainingData))
+trainingData <- trainingData[,keepIndex]
+```
+
+### Training and Cross-Validation Sets
+
+We will not further split the training data set into two: one for training and the other for cross-validation.
+```{r}
+set.seed(1234)
+inTrain <- createDataPartition(y=trainingData$classe, p=0.15, list=FALSE)
+training <- trainingData[inTrain, ]
+crossvalid <- trainingData[-inTrain, ]
+```
+
+### Prediction Model
+
+We will use a random forest to develop the prediction algorithm
+
+```{r, cache=TRUE}
+modFit <- train(classe ~ ., data = training, method="rf", prox=TRUE,allowParallel=T,trControl=trainControl(method='cv',number=4))
+```
+
+The below summarizes the results of the model
+```{r}
+modFit
+fancyRpartPlot(modFit$finalModel)
+```
+
+## Results on the Cross-Validation Set
+
+As for the prediction statistics on cross-validation set:
+
+```{r}
+prediction <- predict(modFit, newdata=crossvalid)
+confusionMatrix(prediction, crossvalid$classe)
+```
+
+
+
+

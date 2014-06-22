@@ -1,0 +1,87 @@
+---
+title: "An Analysis of MPG by Transmission Type"
+author: "Matt Moramarco"
+date: "June 22, 2014"
+output: pdf_document
+---
+
+## Executive Summary
+
+This paper seeks to address how a vehicle's transmission (automatic or manual) impacts that vehicles MPG.
+
+```{r echo = FALSE}
+data(mtcars)
+```
+```{r}
+boxplot(mpg ~ am, data = mtcars, xlab = "Transmission", ylab = "MPG", main = "MPG by Transmission")
+```
+
+Given the above plot, it would seem that manual transmissions (labeled '1' above) have a higher MPG than automatic transmissions (labeled '0' above). 
+
+The selected model for this analysis incorporates Transmission, Weight, and the interaction between the two as input variables upon on the predicted variable of MPG.
+
+```{r}
+fit3 <- lm(mpg ~ factor(am) * wt, data = mtcars)
+fit3$coef
+```
+
+The positive coeffecient of the manual transmission (14.878) indicates the manual transmissions have a positive effect on MPG (all else being equal). However, this is complicated by the interaction of Weight and Transmission. For each thousand pounds of weight, a manual transmission can expect an additional reduction in MPG in the amount of -5.298 (note that this is in addition to the -3.786 decrease in MPG per thousand pounds that affects both manual and automatic transmissions.
+
+Thus, this model indicates that a manual transmission is more efficient up to a specific weight: 2,808 pounds. At this point, an automatic transmission is more efficient in terms of MPG
+
+```{r}
+plot(predict(fit3,mtcars) , mtcars$mpg, xlab = "Predicted MPG", ylab = "Actual MPG")
+abline(a=0, b = 1, col = "red")
+```
+
+## Appendix
+
+We start by first looking at the data:
+
+```{r results = 'hide'}
+head(mtcars)
+str(mtcars)
+summary(mtcars)
+```
+
+The variable 'am' indicates the cars transmission type where 0 indicates automatic and 1 indicates manual.
+
+### Model 1:
+
+The first model, below, simply conducts a linear regression using mpg as the outcome variable and a factorized tranmission type as the input variable. This model produces a low R-squared indicating that it does not adequately explain the variance.
+
+```{r}
+fit <- lm(mpg ~ factor(am), data = mtcars)
+fit$coef
+```
+
+### Model 2:
+
+The second model builds upon the first but includes all available variables as input variables. While this model's R-squared is much higher than Model 1, explaining a larger portion of the variance, the complexity of the model (the inclusion of all the variables) is inefficient.
+
+```{r}
+fit2 <- lm(mpg ~ factor(am) + ., data = mtcars)
+fit2$coef
+```
+
+We then look at pairwise plots for all variables against all other variables to gain a better understanding of how variables may interact with mpg.
+
+``` {r}
+pairs(mtcars, panel = panel.smooth)
+```
+
+Transmission, Weight and MPG are isolated in the below pairwise plot as these appear to have the strongest interactions.
+
+```{r}
+pairs(mtcars[c("am","wt","mpg")], panel = panel.smooth)
+```
+
+### Model 3:
+
+Using the information from the above, we now isolate and use Transmission, Weight and the interaction between the two as inputs for our third and final model. This model produces a higher R-squared than Model 2 and is simpler to both explain and understand.
+
+```{r}
+summary(fit3)
+par(mfrow = c(2, 2))
+plot(fit3)
+```
