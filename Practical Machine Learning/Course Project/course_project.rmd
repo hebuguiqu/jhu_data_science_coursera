@@ -41,7 +41,7 @@ crossvalid <- trainingData[-inTrain, ]
 We will use a random forest to develop the prediction algorithm
 
 ```{r, cache=TRUE}
-modFit <- train(classe ~ ., data = training, method="rf", prox=TRUE,allowParallel=T,trControl=trainControl(method='cv',number=4))
+modFit <- train(classe ~ ., data = training, method="rf", prox=TRUE,allowParallel=T,trControl=trainControl(method='cv',number=4), ntrees=750)
 ```
 
 The below summarizes the results of the model
@@ -50,15 +50,18 @@ modFit
 fancyRpartPlot(modFit$finalModel)
 ```
 
-## Results on the Cross-Validation Set
+### Results on the Cross-Validation Set
 
 As for the prediction statistics on cross-validation set:
 
 ```{r}
 prediction <- predict(modFit, newdata=crossvalid)
-confusionMatrix(prediction, crossvalid$classe)
+confusionmat <- confusionMatrix(prediction, crossvalid$classe)
+confusionmat$Table
 ```
 
+### Accuracy
 
-
-
+```{r}
+confusionmat$overall
+```
