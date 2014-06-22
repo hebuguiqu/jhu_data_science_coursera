@@ -20,7 +20,7 @@ testingData <- read.csv("pml-testing.csv")
 
 ### Cleaning Data
 
-Many columns have incomplete data, as such we will only keep those columns that do not have any NAs. Additionally, we set the 'classe' variable to a factor 
+Many columns have incomplete data, as such we will only keep those columns that do not have any NAs. We also seek to minimize the variables by only including those relevant to our prediction. 
 ```{r}
 trainingData <- trainingData[, which(colSums(is.na(trainingData)) == 0)]
 keepIndex <- grep("_arm|_forearm|_belt|_dumbbell|user|classe",names(trainingData))
@@ -29,7 +29,7 @@ trainingData <- trainingData[,keepIndex]
 
 ### Training and Cross-Validation Sets
 
-We will not further split the training data set into two: one for training and the other for cross-validation.
+We will further split the training data set into two: one for training and the other for cross-validation. The p=0.15 is included to minimize the modeling time.
 ```{r}
 set.seed(1234)
 inTrain <- createDataPartition(y=trainingData$classe, p=0.15, list=FALSE)
