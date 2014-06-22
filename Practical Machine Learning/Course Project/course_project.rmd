@@ -13,6 +13,7 @@ Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible t
 
 ```{r}
 library(caret)
+library(rattle)
 trainingData <- read.csv("pml-training.csv")
 testingData <- read.csv("pml-testing.csv")
 ```
@@ -58,10 +59,5 @@ As for the prediction statistics on cross-validation set:
 prediction <- predict(modFit, newdata=crossvalid)
 confusionmat <- confusionMatrix(prediction, crossvalid$classe)
 confusionmat$Table
-```
-
-### Accuracy
-
-```{r}
 confusionmat$overall
 ```
