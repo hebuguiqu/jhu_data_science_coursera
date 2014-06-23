@@ -31,10 +31,11 @@ trainingData <- trainingData[,-removeIndex]
 
 ### Training and Cross-Validation Sets
 
-We will further split the training data set into two: one for training and the other for cross-validation. The p=0.15 is included to minimize the modeling time.
+We will further split the training data set into two: one for training and the other for cross-validation.
+
 ```{r}
 set.seed(1234)
-inTrain <- createDataPartition(y=trainingData$classe, p=0.15, list=FALSE)
+inTrain <- createDataPartition(y=trainingData$classe, p=0.30, list=FALSE)
 training <- trainingData[inTrain, ]
 crossvalid <- trainingData[-inTrain, ]
 ```
