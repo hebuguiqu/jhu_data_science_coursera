@@ -13,7 +13,7 @@ Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible t
 
 ```{r}
 library(caret)
-library(rattle)
+library(randomForest)
 trainingData <- read.csv("pml-training.csv")
 testingData <- read.csv("pml-testing.csv")
 ```
@@ -23,8 +23,10 @@ testingData <- read.csv("pml-testing.csv")
 Many columns have incomplete data, as such we will only keep those columns that do not have any NAs. We also seek to minimize the variables by only including those relevant to our prediction. 
 ```{r}
 trainingData <- trainingData[, which(colSums(is.na(trainingData)) == 0)]
-keepIndex <- grep("_arm|_forearm|_belt|_dumbbell|user|classe",names(trainingData))
+keepIndex <- grep("_arm|_forearm|_belt|_dumbbell|classe",names(trainingData))
 trainingData <- trainingData[,keepIndex]
+removeIndex <- grep("kurtosis_|skewness_|max_|min_|amplitude_|user",names(trainingData))
+trainingData <- trainingData[,-removeIndex]
 ```
 
 ### Training and Cross-Validation Sets
@@ -42,13 +44,13 @@ crossvalid <- trainingData[-inTrain, ]
 We will use a random forest to develop the prediction algorithm
 
 ```{r, cache=TRUE}
-modFit <- train(classe ~ ., data = training, method="rf", prox=TRUE,allowParallel=T,trControl=trainControl(method='cv',number=4), ntrees=750)
+#modFit <- train(classe ~ ., data = training, method="rf", prox=TRUE,allowParallel=T,trControl=trainControl(method='cv',number=4), ntrees=750)
+modFit <- randomForest(classe ~ ., data = training, ntree= 800, mtry = 20)
 ```
 
 The below summarizes the results of the model
 ```{r}
 modFit
-fancyRpartPlot(modFit$finalModel)
 ```
 
 ### Results on the Cross-Validation Set
@@ -58,6 +60,6 @@ As for the prediction statistics on cross-validation set:
 ```{r}
 prediction <- predict(modFit, newdata=crossvalid)
 confusionmat <- confusionMatrix(prediction, crossvalid$classe)
-confusionmat$Table
 confusionmat$overall
+confusionmat$overall[1]
 ```
