@@ -46,3 +46,40 @@ confusionMatrix(pred_stacked,testing$diagnosis)
 confusionMatrix(predrf, testing$diagnosis)
 confusionMatrix(predgbm, testing$diagnosis)
 confusionMatrix(predlda, testing$diagnosis)
+
+# Question 3
+
+set.seed(3523)
+library(AppliedPredictiveModeling)
+data(concrete)
+inTrain = createDataPartition(concrete$CompressiveStrength, p = 3/4)[[1]]
+training = concrete[ inTrain,]
+testing = concrete[-inTrain,]
+set.seed(233)
+modFit<-train(CompressiveStrength~.,data=training, method="lasso")
+object <- enet(x=as.matrix(subset(training, select=-c(CompressiveStrength))), y=training$CompressiveStrength, lambda=0)
+plot(object,xvar="penalty")
+
+# Question 4
+
+library(lubridate)
+library(forecast)
+dat = read.csv("gaData.csv")
+training = dat[year(dat$date)==2011,]
+testing = dat[year(dat$date)>2011,]
+tstrain = ts(training$visitsTumblr)
+modBats <- bats(tstrain)
+pred <- forecast(modBats, h=length(testing$visitsTumblr),level=c(80,95))
+accuracy <- 1-sum(testing$visitsTumblr>pred$upper[,2])/length(testing$visitsTumblr)
+
+# Question 5
+library(e1071)
+set.seed(3523)
+library(AppliedPredictiveModeling)
+data(concrete)
+inTrain = createDataPartition(concrete$CompressiveStrength, p = 3/4)[[1]]
+training = concrete[ inTrain,]
+testing = concrete[-inTrain,]
+svm.model <- svm(CompressiveStrength ~ ., data = training)
+svm.pred  <- predict(svm.model, testing)
+accuracy(svm.pred, testing$CompressiveStrength)
